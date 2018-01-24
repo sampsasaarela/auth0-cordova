@@ -170,6 +170,30 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
 };
 
 /**
+ * Opens the same OS browser that was used for authorization and redirects to `{domain}/logout` to terminate sso session
+ *
+ * @method logout
+ * @param {callback} callback
+ */
+
+CordovaAuth.prototype.logout = function (callback) {
+  var self = this;
+  var client = self.client;
+  getAgent(function (err, agent) {
+    if (err) {
+      return callback(err);
+    }
+    var logoutUrl = client.buildLogoutUrl({});
+    agent.open(logoutUrl, function (error, result) {
+      if (error != null) {
+        return callback(error);
+      }
+      callback(null, result.event === 'loaded');
+    });
+  });
+};
+
+/**
  * Handler that must be called with the redirect url the browser tries to open after the OAuth flow is done.
  * To listen to that event, using cordova-plugin-customurlscheme, you need to register a callback in the method `window.handleOpenURL`
  * ```
