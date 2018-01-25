@@ -114,57 +114,53 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
           return;
         }
       }
+    });
 
-      if (result.event !== 'loaded') {
-        // Ignore any other events.
-        return;
+    session.start(function (sessionError, redirectUrl) {
+      if (sessionError != null) {
+        callback(sessionError);
+        return true;
       }
 
-      session.start(function (sessionError, redirectUrl) {
-        if (sessionError != null) {
-          callback(sessionError);
-          return true;
-        }
 
-        if (redirectUrl.indexOf(redirectUri) === -1) {
-          return false;
-        }
-
-        if (!redirectUrl || typeof redirectUrl !== 'string') {
-          callback(new Error('url must be a string'));
-          return true;
-        }
-
-        var response = parse(redirectUrl, true).query;
-        if (response.error) {
-          callback(new Error(response.error_description || response.error));
-          return true;
-        }
-
-        var responseState = response.state;
-        if (responseState !== requestState) {
-          callback(new Error('Response state does not match expected state'));
-          return true;
-        }
-
-        var code = response.code;
-        var verifier = keys.codeVerifier;
-        agent.close();
-
-        client.oauthToken({
-          code_verifier: verifier,
-          grantType: 'authorization_code',
-          redirectUri: redirectUri,
-          code: code
-        }, function (exchangeError, exchangeResult) {
-          if (exchangeError) {
-            return callback(exchangeError);
-          }
-          return callback(null, exchangeResult);
-        });
-
+      if (!redirectUrl || typeof redirectUrl !== 'string') {
+        callback(new Error('url must be a string'));
         return true;
+      }
+
+      if (redirectUrl.indexOf(redirectUri) === -1) {
+        return false;
+      }
+
+      var response = parse(redirectUrl, true).query;
+      if (response.error) {
+        callback(new Error(response.error_description || response.error));
+        return true;
+      }
+
+      var responseState = response.state;
+      if (responseState !== requestState) {
+        callback(new Error('Response state does not match expected state'));
+        return true;
+      }
+
+      var code = response.code;
+      var verifier = keys.codeVerifier;
+      agent.close();
+
+      client.oauthToken({
+        code_verifier: verifier,
+        grantType: 'authorization_code',
+        redirectUri: redirectUri,
+        code: code
+      }, function (exchangeError, exchangeResult) {
+        if (exchangeError) {
+          return callback(exchangeError);
+        }
+        return callback(null, exchangeResult);
       });
+
+      return true;
     });
   });
 };
