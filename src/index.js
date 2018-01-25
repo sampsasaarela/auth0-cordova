@@ -181,14 +181,7 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
  * @param {String} url with a custom scheme relied to the application
  */
 CordovaAuth.onRedirectUri = function (url) {
-  // If we are running in UIWebView we need to wait
-  if (window.webkit && window.webkit.messageHandlers) {
-    return session.onRedirectUri(url);
-  }
-
-  return setTimeout(function () {
-    session.onRedirectUri(url);
-  }, 4);
+  return session.onRedirectUri(url);
 };
 
 CordovaAuth.version = version;
