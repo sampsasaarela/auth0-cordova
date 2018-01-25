@@ -115,7 +115,7 @@ CordovaAuth.prototype.authorize = function (parameters, callback) {
         }
       }
 
-      if (result.event !== 'loaded') {
+      if (result.event !== 'opened') {
         // Ignore any other events.
         return;
       }
