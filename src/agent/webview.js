@@ -3,6 +3,7 @@ function WebView() {
   this.tab = null;
   this.handler = null;
   this.open = this.open.bind(this);
+  this.handleFirstLoadStart = this.handleFirstLoadStart.bind(this);
   this.handleFirstLoadEnd = this.handleFirstLoadEnd.bind(this);
   this.handleLoadError = this.handleLoadError.bind(this);
   this.handleExit = this.handleExit.bind(this);
@@ -14,6 +15,7 @@ WebView.prototype.open = function (url, handler) {
   var browser = window.cordova.InAppBrowser;
   var tab = browser.open(url, '_blank');
 
+  tab.addEventListener('loadstart', this.handleFirstLoadStart);
   tab.addEventListener('loadstop', this.handleFirstLoadEnd);
   tab.addEventListener('loaderror', this.handleLoadError);
   tab.addEventListener('exit', this.handleExit);
@@ -21,6 +23,9 @@ WebView.prototype.open = function (url, handler) {
   this.handler = handler;
 };
 
+WebView.prototype.handleFirstLoadStart = function () {
+  this.handler(null, { event: 'opened' });
+};
 WebView.prototype.handleFirstLoadEnd = function () {
   this.handler(null, { event: 'loaded' });
 };
@@ -36,16 +41,17 @@ WebView.prototype.handleExit = function () {
 };
 
 WebView.prototype.clearEvents = function () {
-  if (this.tab.null) {
+  if (!this.tab) {
     return;
   }
-  this.tab.removeEventListener('loaderror', this.handleLoadError);
+  this.tab.removeEventListener('loadstart', this.handleFirstLoadStart);
   this.tab.removeEventListener('loadstop', this.handleFirstLoadEnd);
+  this.tab.removeEventListener('loaderror', this.handleLoadError);
   this.tab.removeEventListener('exit', this.handleExit);
 };
 
 WebView.prototype.close = function () {
-  if (this.tab != null) {
+  if (this.tab) {
     this.tab.close();
   }
   this.clearEvents();
