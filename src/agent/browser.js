@@ -9,11 +9,11 @@ Browser.isAvailable = function (callback) {
 };
 
 
-Browser.prototype.open = function (url, callback) {
-  var options = {
+Browser.prototype.open = function (url, callback, options) {
+  var options = Object.assign({
     hidden: false,
     url: url
-  };
+  }, options || {});
 
   this.browser.show(options, function (result) {
     callback(null, result);
